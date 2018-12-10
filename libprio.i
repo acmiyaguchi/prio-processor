@@ -15,7 +15,7 @@ atexit(Prio_clear);
 // Handle SECStatus.
 %typemap(out) SECStatus {
    if ($1 != SECSuccess) {
-       PyErr_SetString(PyExc_RuntimeError, "$symname was not succesful.");
+       PyErr_SetString(PyExc_RuntimeError, "$symname was not successful.");
        SWIG_fail;
    }
    $result = Py_BuildValue("");
@@ -214,7 +214,7 @@ PyObject* TYPE ## _write_wrapper(const_ ## TYPE p) {
     SECStatus rv = TYPE ## _write(p, &pk);
     if (rv == SECSuccess) {
         // move the data outside of this wrapper
-        data = PyBytes_FromStringAndSize(sbuf.data, sbuf.size);
+        data = PyBytes_FromStringAndSize(sbuf.data, sbuf.size+1);
     }
 
     // free msgpacker data-structures
@@ -246,8 +246,9 @@ SECStatus TYPE ## _read_wrapper(TYPE p, const unsigned char *data, unsigned int 
     msgpack_unpacker upk;
     bool result = msgpack_unpacker_init(&upk, len+1);
     if (result) {
-        memcpy(msgpack_unpacker_buffer(&upk), data, len);
-        msgpack_unpacker_buffer_consumed(&upk, len);
+        // ignore the nullbyte at the end of the string
+        memcpy(msgpack_unpacker_buffer(&upk), data, len-1);
+        msgpack_unpacker_buffer_consumed(&upk, len-1);
         rv = TYPE ## _read(p, &upk, cfg);
     }
     msgpack_unpacker_destroy(&upk);

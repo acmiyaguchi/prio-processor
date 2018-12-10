@@ -3143,7 +3143,7 @@ PyObject* PrioPacketVerify1_write_wrapper(const_PrioPacketVerify1 p) {
     SECStatus rv = PrioPacketVerify1_write(p, &pk);
     if (rv == SECSuccess) {
         // move the data outside of this wrapper
-        data = PyBytes_FromStringAndSize(sbuf.data, sbuf.size);
+        data = PyBytes_FromStringAndSize(sbuf.data, sbuf.size+1);
     }
 
     // free msgpacker data-structures
@@ -3163,7 +3163,7 @@ PyObject* PrioPacketVerify2_write_wrapper(const_PrioPacketVerify2 p) {
     SECStatus rv = PrioPacketVerify2_write(p, &pk);
     if (rv == SECSuccess) {
         // move the data outside of this wrapper
-        data = PyBytes_FromStringAndSize(sbuf.data, sbuf.size);
+        data = PyBytes_FromStringAndSize(sbuf.data, sbuf.size+1);
     }
 
     // free msgpacker data-structures
@@ -3183,7 +3183,7 @@ PyObject* PrioTotalShare_write_wrapper(const_PrioTotalShare p) {
     SECStatus rv = PrioTotalShare_write(p, &pk);
     if (rv == SECSuccess) {
         // move the data outside of this wrapper
-        data = PyBytes_FromStringAndSize(sbuf.data, sbuf.size);
+        data = PyBytes_FromStringAndSize(sbuf.data, sbuf.size+1);
     }
 
     // free msgpacker data-structures
@@ -3198,8 +3198,9 @@ SECStatus PrioPacketVerify1_read_wrapper(PrioPacketVerify1 p, const unsigned cha
     msgpack_unpacker upk;
     bool result = msgpack_unpacker_init(&upk, len+1);
     if (result) {
-        memcpy(msgpack_unpacker_buffer(&upk), data, len);
-        msgpack_unpacker_buffer_consumed(&upk, len);
+        // ignore the nullbyte at the end of the string
+        memcpy(msgpack_unpacker_buffer(&upk), data, len-1);
+        msgpack_unpacker_buffer_consumed(&upk, len-1);
         rv = PrioPacketVerify1_read(p, &upk, cfg);
     }
     msgpack_unpacker_destroy(&upk);
@@ -3368,8 +3369,9 @@ SECStatus PrioPacketVerify2_read_wrapper(PrioPacketVerify2 p, const unsigned cha
     msgpack_unpacker upk;
     bool result = msgpack_unpacker_init(&upk, len+1);
     if (result) {
-        memcpy(msgpack_unpacker_buffer(&upk), data, len);
-        msgpack_unpacker_buffer_consumed(&upk, len);
+        // ignore the nullbyte at the end of the string
+        memcpy(msgpack_unpacker_buffer(&upk), data, len-1);
+        msgpack_unpacker_buffer_consumed(&upk, len-1);
         rv = PrioPacketVerify2_read(p, &upk, cfg);
     }
     msgpack_unpacker_destroy(&upk);
@@ -3382,8 +3384,9 @@ SECStatus PrioTotalShare_read_wrapper(PrioTotalShare p, const unsigned char *dat
     msgpack_unpacker upk;
     bool result = msgpack_unpacker_init(&upk, len+1);
     if (result) {
-        memcpy(msgpack_unpacker_buffer(&upk), data, len);
-        msgpack_unpacker_buffer_consumed(&upk, len);
+        // ignore the nullbyte at the end of the string
+        memcpy(msgpack_unpacker_buffer(&upk), data, len-1);
+        msgpack_unpacker_buffer_consumed(&upk, len-1);
         rv = PrioTotalShare_read(p, &upk, cfg);
     }
     msgpack_unpacker_destroy(&upk);
@@ -3614,7 +3617,7 @@ SWIGINTERN PyObject *_wrap_PrioPacketVerify1_read(PyObject *SWIGUNUSEDPARM(self)
   result = PrioPacketVerify1_read_wrapper(arg1,(unsigned char const *)arg2,arg3,(struct prio_config const *)arg4);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PrioPacketVerify1_read was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PrioPacketVerify1_read was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -3654,7 +3657,7 @@ SWIGINTERN PyObject *_wrap_PrioPacketVerify2_read(PyObject *SWIGUNUSEDPARM(self)
   result = PrioPacketVerify2_read_wrapper(arg1,(unsigned char const *)arg2,arg3,(struct prio_config const *)arg4);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PrioPacketVerify2_read was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PrioPacketVerify2_read was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -3694,7 +3697,7 @@ SWIGINTERN PyObject *_wrap_PrioTotalShare_read(PyObject *SWIGUNUSEDPARM(self), P
   result = PrioTotalShare_read_wrapper(arg1,(unsigned char const *)arg2,arg3,(struct prio_config const *)arg4);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PrioTotalShare_read was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PrioTotalShare_read was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -3713,7 +3716,7 @@ SWIGINTERN PyObject *_wrap_Prio_init(PyObject *SWIGUNUSEDPARM(self), PyObject *a
   result = Prio_init();
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "Prio_init was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "Prio_init was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -3841,7 +3844,7 @@ SWIGINTERN PyObject *_wrap_Keypair_new(PyObject *SWIGUNUSEDPARM(self), PyObject 
   result = Keypair_new(arg1,arg2);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "Keypair_new was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "Keypair_new was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -3882,7 +3885,7 @@ SWIGINTERN PyObject *_wrap_PublicKey_import(PyObject *SWIGUNUSEDPARM(self), PyOb
   result = PublicKey_import(arg1,(unsigned char const *)arg2,arg3);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PublicKey_import was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PublicKey_import was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -3931,7 +3934,7 @@ SWIGINTERN PyObject *_wrap_PrivateKey_import(PyObject *SWIGUNUSEDPARM(self), PyO
   result = PrivateKey_import(arg1,(unsigned char const *)arg2,arg3,(unsigned char const *)arg4,arg5);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PrivateKey_import was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PrivateKey_import was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -3969,7 +3972,7 @@ SWIGINTERN PyObject *_wrap_PublicKey_import_hex(PyObject *SWIGUNUSEDPARM(self), 
   result = PublicKey_import_hex(arg1,(unsigned char const *)arg2,arg3);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PublicKey_import_hex was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PublicKey_import_hex was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -4018,7 +4021,7 @@ SWIGINTERN PyObject *_wrap_PrivateKey_import_hex(PyObject *SWIGUNUSEDPARM(self),
   result = PrivateKey_import_hex(arg1,(unsigned char const *)arg2,arg3,(unsigned char const *)arg4,arg5);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PrivateKey_import_hex was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PrivateKey_import_hex was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -4070,7 +4073,7 @@ SWIGINTERN PyObject *_wrap_PrioClient_encode(PyObject *SWIGUNUSEDPARM(self), PyO
   result = PrioClient_encode((struct prio_config const *)arg1,(bool const *)arg2,arg3,arg4,arg5,arg6);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PrioClient_encode was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PrioClient_encode was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -4106,7 +4109,7 @@ SWIGINTERN PyObject *_wrap_PrioPRGSeed_randomize(PyObject *SWIGUNUSEDPARM(self),
   result = PrioPRGSeed_randomize((unsigned char (*)[AES_128_KEY_LENGTH])arg1);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PrioPRGSeed_randomize was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PrioPRGSeed_randomize was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -4203,7 +4206,7 @@ SWIGINTERN PyObject *_wrap_PrioVerifier_set_data(PyObject *SWIGUNUSEDPARM(self),
   result = PrioVerifier_set_data(arg1,arg2,arg3);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PrioVerifier_set_data was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PrioVerifier_set_data was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -4247,7 +4250,7 @@ SWIGINTERN PyObject *_wrap_PrioPacketVerify1_set_data(PyObject *SWIGUNUSEDPARM(s
   result = PrioPacketVerify1_set_data(arg1,(struct prio_verifier const *)arg2);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PrioPacketVerify1_set_data was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PrioPacketVerify1_set_data was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -4301,7 +4304,7 @@ SWIGINTERN PyObject *_wrap_PrioPacketVerify2_set_data(PyObject *SWIGUNUSEDPARM(s
   result = PrioPacketVerify2_set_data(arg1,(struct prio_verifier const *)arg2,(struct prio_packet_verify1 const *)arg3,(struct prio_packet_verify1 const *)arg4);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PrioPacketVerify2_set_data was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PrioPacketVerify2_set_data was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -4335,7 +4338,7 @@ SWIGINTERN PyObject *_wrap_PrioVerifier_isValid(PyObject *SWIGUNUSEDPARM(self), 
   result = PrioVerifier_isValid((struct prio_verifier const *)arg1,(struct prio_packet_verify2 const *)arg2,(struct prio_packet_verify2 const *)arg3);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PrioVerifier_isValid was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PrioVerifier_isValid was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -4364,7 +4367,7 @@ SWIGINTERN PyObject *_wrap_PrioServer_aggregate(PyObject *SWIGUNUSEDPARM(self), 
   result = PrioServer_aggregate(arg1,arg2);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PrioServer_aggregate was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PrioServer_aggregate was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -4408,7 +4411,7 @@ SWIGINTERN PyObject *_wrap_PrioTotalShare_set_data(PyObject *SWIGUNUSEDPARM(self
   result = PrioTotalShare_set_data(arg1,(struct prio_server const *)arg2);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PrioTotalShare_set_data was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PrioTotalShare_set_data was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
@@ -4444,7 +4447,7 @@ SWIGINTERN PyObject *_wrap_PrioTotalShare_final(PyObject *SWIGUNUSEDPARM(self), 
   result = PrioTotalShare_final((struct prio_config const *)arg1,arg2,(struct prio_total_share const *)arg3,(struct prio_total_share const *)arg4);
   {
     if (result != SECSuccess) {
-      PyErr_SetString(PyExc_RuntimeError, "PrioTotalShare_final was not succesful.");
+      PyErr_SetString(PyExc_RuntimeError, "PrioTotalShare_final was not successful.");
       SWIG_fail;
     }
     resultobj = Py_BuildValue("");
