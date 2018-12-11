@@ -100,6 +100,13 @@ p1B = PrioPacketVerify1_new()
 PrioPacketVerify1_set_data(p1A, vA)
 PrioPacketVerify1_set_data(p1B, vB)
 
+dataA = PrioPacketVerify1_write(p1A)
+dataB = PrioPacketVerify1_write(p1B)
+p1A = PrioPacketVerify1_new()
+p1B = PrioPacketVerify1_new()
+PrioPacketVerify1_read(p1A, dataA, sA.config)
+PrioPacketVerify1_read(p1B, dataB, sB.config)
+
 # Produce packet2 and send to the other party
 p2A = PrioPacketVerify2_new()
 p2B = PrioPacketVerify2_new()
@@ -108,6 +115,12 @@ PrioPacketVerify2_set_data(p2B, vB, p1A, p1B)
 
 print(PrioPacketVerify2_write(p2A))
 print(PrioPacketVerify2_write(p2B))
+dataA = PrioPacketVerify2_write(p2A)
+dataB = PrioPacketVerify2_write(p2B)
+p2A = PrioPacketVerify2_new()
+p2B = PrioPacketVerify2_new()
+PrioPacketVerify2_read(p2A, dataA, sA.config)
+PrioPacketVerify2_read(p2B, dataB, sB.config)
 
 # Check validity of the request
 PrioVerifier_isValid(vA, p2A, p2B)
@@ -134,3 +147,42 @@ print(verify2_df.head().to_string())
 
 x = validate_aggregate(verify2_df, init_a_cb)
 y = validate_aggregate(verify2_df, init_b_cb)
+
+
+# test
+
+x = next(verify1_df.itertuples())
+vA = PrioVerifier_new(sA.server)
+vB = PrioVerifier_new(sB.server)
+
+def pass2(a, b, s, verifier):
+    verify1_a = PrioPacketVerify1_new()
+    verify1_b = PrioPacketVerify1_new()
+    verify2 = PrioPacketVerify2_new()
+    PrioPacketVerify1_read(verify1_a, a, s.config)
+    PrioPacketVerify1_read(verify1_b, b, s.config)
+    PrioPacketVerify2_set_data(verify2, verifier, verify1_a, verify1_b)
+    return verify2
+
+p2A = pass2(x.verify1_a, x.verify1_b, sA, vA)
+p2B = pass2(x.verify1_a, x.verify1_b, sB, vB)
+
+for_server_a, for_server_b = PrioClient_encode(sA.config, bytes([1]*k))
+vA = PrioVerifier_new(sA.server)
+vB = PrioVerifier_new(sB.server)
+PrioVerifier_set_data(vA, for_server_a)
+PrioVerifier_set_data(vB, for_server_b)
+p1A = PrioPacketVerify1_new()
+p1B = PrioPacketVerify1_new()
+PrioPacketVerify1_set_data(p1A, vA)
+PrioPacketVerify1_set_data(p1B, vB)
+dataA = PrioPacketVerify1_write(p1A)
+dataB = PrioPacketVerify1_write(p1B)
+p2A = pass2(dataA, dataB, sA, vA)
+p2B = pass2(dataA, dataB, sB, vB)
+
+print(PrioPacketVerify2_write(p2A))
+print(PrioPacketVerify2_write(p2B))
+
+PrioVerifier_isValid(vA, p2A, p2B)
+PrioVerifier_isValid(vB, p2A, p2B)
